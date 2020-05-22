@@ -13,5 +13,5 @@ Your Virtual Machine must be set up to use VMDK, and the original OS must be ins
 Your Virtualbox must be configured to export the VM to OCI Object storage after running the script.
 
 From there, you will need to import a custom image with the following parameters:
-  Image Type = VMDK
-  Lauch Mode = Native
+	Image Type = VMDK
+	Lauch Mode = Native
