@@ -15,4 +15,4 @@ Your Virtualbox must be configured to export the VM to OCI Object storage after 
 From there, you will need to import a custom image with the following parameters:
 	
 	Image Type = VMDK
-	Lauch Mode = Native
+	Launch Mode = Native
