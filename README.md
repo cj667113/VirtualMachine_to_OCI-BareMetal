@@ -1,10 +1,10 @@
-# RHEL → OCI-BareMetal
+# VirtualMachine → OCI-BareMetal
 
 Shell scripts to take a Virtual Machine inside Oracle VirtualBox and convert it to an image to be used by Oracle BareMetal Instance.
 
 ## IMPORTANT
 
-Clone your RHEL Virtual Machine before continuing. This process will render your Virtual Machine no longer bootable inside Oracle VirtualBox.
+Clone Virtual Machine before continuing. This process will render your Virtual Machine no longer bootable inside Oracle VirtualBox.
 
 ## Prerequirements
 
