@@ -12,4 +12,4 @@ sudo systemctl enable getty@ttyS0
 sudo systemctl start getty@ttyS0
 for file in $(find /boot -name "vmlinuz-*" -and -not -name "vmlinuz-*rescue*") ; do
 dracut --force --no-hostonly /boot/initramfs-${file:14}.img ${file:14} ; done
-sudoo halt -p
+sudo halt -p
