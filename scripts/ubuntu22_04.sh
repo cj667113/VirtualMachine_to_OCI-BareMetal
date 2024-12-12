@@ -1,5 +1,5 @@
 #!/bin/bash
-
+###THIS IS A WORKING DEVELOPMENT SCRIPT###
 sudo ln -sf /lib/systemd/system/multi-user.target /etc/systemd/system/default.target
 sudo apt-get install open-iscsi qemu-guest-agent -y
 sudo systemctl enable --now iscsid
