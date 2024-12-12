@@ -1,14 +1,14 @@
 #!/bin/bash
 
 sudo ln -sf /lib/systemd/system/multi-user.target /etc/systemd/system/default.target
-sudo apt-get install dracut-core dracut-network iscsiuio open-iscsi qemu-guest-tools -y
+sudo apt-get install dracut-core dracut-network iscsiuio open-iscsi qemu-guest-agent -y
 sudo systemctl enable qemu-guest-agent
-sudo systemctl start qemu-guest-agent
+#sudo systemctl start qemu-guest-agent
 sudo systemctl enable iscsid
-sudo systemctl start iscsid
-
+#sudo systemctl start iscsid
 echo "Dependencies Installed"
 echo 'add_dracutmodules+="iscsi"' >> /etc/dracut.conf.d/iscsi.conf
+echo 'add_drivers+=" virtio_blk virtio_net virtio_pci virtio_scsi"' >> /etc/dracut.conf.d/virtio.conf
 echo "ISCSI Modules Added to Dracut"
 cat /etc/default/grub | grep -v 'GRUB_SERIAL_COMMAND\|GRUB_TERMINAL\|GRUB_CMDLINE_LINUX' > /tmp/grub
 echo 'GRUB_TERMINAL="console"' >> /tmp/grub
