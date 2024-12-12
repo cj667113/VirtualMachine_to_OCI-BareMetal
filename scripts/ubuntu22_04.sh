@@ -1,7 +1,9 @@
 #!/bin/bash
 
 sudo ln -sf /lib/systemd/system/multi-user.target /etc/systemd/system/default.target
-sudo apt-get install dracut-core dracut-network *iscsi* qemu-guest-agent -y
+sudo apt-get install open-iscsi qemu-guest-agent -y
+sudo systemctl enable --now iscsid
+sudo systemctl enable --now open-iscsi
 echo "Dependencies Installed"
 cat /etc/default/grub | grep -v 'GRUB_SERIAL_COMMAND\|GRUB_TERMINAL\|GRUB_CMDLINE_LINUX' > /tmp/grub
 echo 'GRUB_TERMINAL="console"' >> /tmp/grub
