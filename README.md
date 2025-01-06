@@ -6,6 +6,8 @@ Shell scripts to take a Virtual Machine inside Oracle VirtualBox and convert it 
 
 Clone Virtual Machine before continuing. This process will render your Virtual Machine no longer bootable inside Oracle VirtualBox.
 
+Ubuntu 22.04 Scripts are broken.
+
 ## Prerequirements
 
 Your Virtual Machine must be set up to use VMDK, and the original OS must be installed with EFI and LVM enabled.
