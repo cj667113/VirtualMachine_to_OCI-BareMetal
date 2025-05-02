@@ -12,6 +12,8 @@ cat <<EOF > /etc/kernel/cmdline
 ip=dhcp LANG=en_US.UTF-8 console=tty0 console=ttyS0,115200 iommu=on systemd.log_level=debug systemd.log_target=kmsg log_buf_len=5M netroot=iscsi:@169.254.0.2::::iqn.2015-02.oracle.boot:uefi rd.luks=0 rd.md=0 rd.dm=0 rd.lvm.vg=${VG} rd.lvm.lv=${VG}/${LV} rd.net.timeout.dhcp=10 rd.net.timeout.carrier=5 rd.iscsi.param=node.session.timeo.replacement_timeout=6000 net.ifnames=1 nvme_core.shutdown_timeout=10 ipmi_si.tryacpi=0 ipmi_si.trydmi=0 libiscsi.debug_libiscsi_eh=1 loglevel=4 crash_kexec_post_notifiers crashkernel=1G-64G:448M,64G-:512M rd.iscsi.firmware=1 iscsi_initiator=iqn.2015-02.oracle.boot:instance
 EOF
 echo "Done. Rebuilding GRUB config..."
+KERNEL_VERSION=$(uname -r)
+rm -f /boot/loader/entries/*-${KERNEL_VERSION}.conf
 kernel-install add $(uname -r) /boot/vmlinuz-$(uname -r)
 grub2-mkconfig -o /etc/grub2-efi.cfg
 sudo stty -F /dev/ttyS0 speed 9600
