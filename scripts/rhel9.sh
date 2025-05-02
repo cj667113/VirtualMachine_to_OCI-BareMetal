@@ -8,31 +8,11 @@ echo 'GRUB_TERMINAL="console"' >> /tmp/grub
 GRUB_CMDLINE_LINUX="ip=dhcp LANG=en_US.UTF-8 console=tty0 console=ttyS0,115200 iommu=on systemd.log_level=debug systemd.log_target=kmsg log_buf_len=5M netroot=iscsi:@169.254.0.2::::iqn.2015-02.oracle.boot:uefi rd.luks=0 rd.md=0 rd.dm=0 rd.lvm.vg=${VG} rd.lvm.lv=${VG}/${LV} rd.net.timeout.dhcp=10 rd.net.timeout.carrier=5 rd.iscsi.param=node.session.timeo.replacement_timeout=6000 net.ifnames=1 nvme_core.shutdown_timeout=10 ipmi_si.tryacpi=0 ipmi_si.trydmi=0 libiscsi.debug_libiscsi_eh=1 loglevel=4 crash_kexec_post_notifiers crashkernel=1G-64G:448M,64G-:512M rd.iscsi.firmware=1 iscsi_initiator=iqn.2015-02.oracle.boot:instance"
 echo "GRUB_CMDLINE_LINUX=\"$GRUB_CMDLINE_LINUX\"" >> /tmp/grub
 cp /tmp/grub /etc/default/grub
-set -euo pipefail
-
-ENTRY_DIR="/boot/loader/entries"
-BACKUP_DIR="/boot/loader/entries/backup-$(date +%Y%m%d-%H%M%S)"
-mkdir -p "$BACKUP_DIR"
-
-# Get first VG and LV names
-read VG LV < <(lvs --noheadings -o vg_name,lv_name | awk 'NR==1 {print $1, $2}')
-REPLACEMENT="rd.luks=0 rd.md=0 rd.dm=0 rd.lvm.vg=${VG} rd.lvm.lv=${VG}/${LV}"
-
-echo "Detected VG: $VG, LV: $LV"
-echo "Replacement string: $REPLACEMENT"
-echo "Backing up original .conf files to: $BACKUP_DIR"
-
-for entry in "$ENTRY_DIR"/*.conf; do
-    [ -e "$entry" ] || continue
-
-    cp "$entry" "$BACKUP_DIR/"
-    echo "Processing: $entry"
-
-    # Replace root=... with new boot args
-    sed -i -E "s/\<root=[^ ]+ ?/${REPLACEMENT} /g" "$entry"
-done
-
+cat <<EOF > /etc/kernel/cmdline
+ip=dhcp LANG=en_US.UTF-8 console=tty0 console=ttyS0,115200 iommu=on systemd.log_level=debug systemd.log_target=kmsg log_buf_len=5M netroot=iscsi:@169.254.0.2::::iqn.2015-02.oracle.boot:uefi rd.luks=0 rd.md=0 rd.dm=0 rd.lvm.vg=${VG} rd.lvm.lv=${VG}/${LV} rd.net.timeout.dhcp=10 rd.net.timeout.carrier=5 rd.iscsi.param=node.session.timeo.replacement_timeout=6000 net.ifnames=1 nvme_core.shutdown_timeout=10 ipmi_si.tryacpi=0 ipmi_si.trydmi=0 libiscsi.debug_libiscsi_eh=1 loglevel=4 crash_kexec_post_notifiers crashkernel=1G-64G:448M,64G-:512M rd.iscsi.firmware=1 iscsi_initiator=iqn.2015-02.oracle.boot:instance
+EOF
 echo "Done. Rebuilding GRUB config..."
+kernel-install add $(uname -r) /lib/modules/$(uname -r)
 grub2-mkconfig -o /etc/grub2-efi.cfg
 sudo stty -F /dev/ttyS0 speed 9600
 dmesg | grep console
