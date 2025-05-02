@@ -1,4 +1,5 @@
 #!/bin/bash
+yum install iscsi-initiator-utils iscsi-initiator-utils-iscsiuio libiscsi udisks2-iscsi -y
 
 sudo ln -sf /lib/systemd/system/multi-user.target /etc/systemd/system/default.target
 read VG LV < <(lvs --noheadings -o vg_name,lv_name | awk 'NR==1 {print $1, $2}')
@@ -13,5 +14,5 @@ dmesg | grep console
 sudo systemctl enable getty@ttyS0
 sudo systemctl start getty@ttyS0
 for file in $(find /boot -name "vmlinuz-*" -and -not -name "vmlinuz-*rescue*") ; do
-dracut --force --no-hostonly /boot/initramfs-${file:14}.img ${file:14} ; done
+dracut --force --no-hostonly --add "iscsi lvm network base" /boot/initramfs-${file:14}.img ${file:14} ; done
 sudo halt -p
