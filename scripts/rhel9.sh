@@ -9,17 +9,29 @@ GRUB_CMDLINE_LINUX="ip=dhcp LANG=en_US.UTF-8 console=tty0 console=ttyS0,115200 i
 echo "GRUB_CMDLINE_LINUX=\"$GRUB_CMDLINE_LINUX\"" >> /tmp/grub
 cp /tmp/grub /etc/default/grub
 set -euo pipefail
+
 ENTRY_DIR="/boot/loader/entries"
 BACKUP_DIR="/boot/loader/entries/backup-$(date +%Y%m%d-%H%M%S)"
 mkdir -p "$BACKUP_DIR"
+
+# Get first VG and LV names
+read VG LV < <(lvs --noheadings -o vg_name,lv_name | awk 'NR==1 {print $1, $2}')
+REPLACEMENT="rd.luks=0 rd.md=0 rd.dm=0 rd.lvm.vg=${VG} rd.lvm.lv=${VG}/${LV}"
+
+echo "Detected VG: $VG, LV: $LV"
+echo "Replacement string: $REPLACEMENT"
 echo "Backing up original .conf files to: $BACKUP_DIR"
+
 for entry in "$ENTRY_DIR"/*.conf; do
-    [ -e "$entry" ] || continue  # skip if no files
+    [ -e "$entry" ] || continue
+
     cp "$entry" "$BACKUP_DIR/"
     echo "Processing: $entry"
-    # Strip root=UUID=... or root=/dev/... from options line
-    sed -i -E 's/\<root=[^ ]+ ?//g' "$entry"
+
+    # Replace root=... with new boot args
+    sed -i -E "s/\<root=[^ ]+ ?/${REPLACEMENT} /g" "$entry"
 done
+
 echo "Done. Rebuilding GRUB config..."
 grub2-mkconfig -o /etc/grub2-efi.cfg
 sudo stty -F /dev/ttyS0 speed 9600
