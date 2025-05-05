@@ -2,6 +2,7 @@
 yum install iscsi-initiator-utils iscsi-initiator-utils-iscsiuio libiscsi udisks2-iscsi -y
 
 sudo ln -sf /lib/systemd/system/multi-user.target /etc/systemd/system/default.target
+# grep rootlv may need to be adjusted if the root filesystem is on a different lv_name
 read VG LV < <(lvs --noheadings -o vg_name,lv_name | grep rootlv | awk '{print $1, $2}')
 cat /etc/default/grub | grep -v 'GRUB_SERIAL_COMMAND\|GRUB_TERMINAL\|GRUB_CMDLINE_LINUX' > /tmp/grub
 echo 'GRUB_TERMINAL="console"' >> /tmp/grub
