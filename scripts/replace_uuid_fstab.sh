@@ -22,8 +22,8 @@ if [ -n "$BOOT_UUID_LINE" ]; then
         fi
 
         # Replace UUID with LABEL in /etc/fstab
-        ESCAPED_UUID=$(echo "UUID=$BOOT_UUID" | sed 's/[]\/$*.^[]/\\&/g')
-        ESCAPED_LABEL=$(echo "LABEL=$BOOT_LABEL" | sed 's/[]\/$*.^[]/\\&/g')
+        ESCAPED_UUID=$(printf '%s\n' "UUID=$BOOT_UUID" | sed 's/[&/\]/\\&/g')
+        ESCAPED_LABEL=$(printf '%s\n' "LABEL=$BOOT_LABEL" | sed 's/[&/\]/\\&/g')
         sed -i "s|$ESCAPED_UUID|$ESCAPED_LABEL|" /etc/fstab
         echo "Updated /boot/efi line: replaced UUID=$BOOT_UUID with LABEL=$BOOT_LABEL"
     fi
@@ -47,8 +47,8 @@ grep '^UUID=' /etc/fstab | while read -r line; do
     LABEL=$(lsblk -no LABEL "$DEV" | head -n1)
 
     if [ -n "$LABEL" ]; then
-        ESCAPED_UUID=$(echo "UUID=$UUID" | sed 's/[]\/$*.^[]/\\&/g')
-        ESCAPED_LABEL=$(echo "LABEL=$LABEL" | sed 's/[]\/$*.^[]/\\&/g')
+        ESCAPED_UUID=$(printf '%s\n' "UUID=$UUID" | sed 's/[&/\]/\\&/g')
+        ESCAPED_LABEL=$(printf '%s\n' "LABEL=$LABEL" | sed 's/[&/\]/\\&/g')
         sed -i "s|$ESCAPED_UUID|$ESCAPED_LABEL|" /etc/fstab
         echo "Replaced UUID=$UUID with LABEL=$LABEL for $MOUNT"
     fi
@@ -56,7 +56,7 @@ grep '^UUID=' /etc/fstab | while read -r line; do
     # Check for LVM
     if [[ "$DEV" =~ /dev/mapper/ ]]; then
         CURRENT_ID=$(grep "$MOUNT" /etc/fstab | awk '{print $1}')
-        ESCAPED_ID=$(echo "$CURRENT_ID" | sed 's/[]\/$*.^[]/\\&/g')
+        ESCAPED_ID=$(printf '%s\n' "$CURRENT_ID" | sed 's/[&/\]/\\&/g')
         sed -i "s|$ESCAPED_ID|$DEV|" /etc/fstab
         echo "Replaced $CURRENT_ID with $DEV for $MOUNT (LVM)"
     fi
