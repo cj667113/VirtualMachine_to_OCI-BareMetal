@@ -15,15 +15,15 @@ if [ -n "$BOOT_UUID_LINE" ]; then
         # Check if label already exists
         BOOT_LABEL=$(lsblk -no LABEL "$BOOT_DEV" | head -n1)
         if [ -z "$BOOT_LABEL" ]; then
-            # Attempt to assign label (assumes vfat for /boot/efi)
-            echo "Assigning label 'boot-efi' to $BOOT_DEV"
-            fatlabel "$BOOT_DEV" boot-efi
-            BOOT_LABEL="boot-efi"
+            # Assign label in uppercase (FAT labels should be uppercase)
+            echo "Assigning label 'BOOT-EFI' to $BOOT_DEV"
+            fatlabel "$BOOT_DEV" BOOT-EFI
+            BOOT_LABEL="BOOT-EFI"
         fi
 
         # Replace UUID with LABEL in /etc/fstab
-        ESCAPED_UUID=$(printf '%s\n' "UUID=$BOOT_UUID" | sed 's/[&/\]/\\&/g')
-        ESCAPED_LABEL=$(printf '%s\n' "LABEL=$BOOT_LABEL" | sed 's/[&/\]/\\&/g')
+        ESCAPED_UUID=$(printf 'UUID=%s' "$BOOT_UUID" | sed 's/[\/&]/\\&/g')
+        ESCAPED_LABEL=$(printf 'LABEL=%s' "$BOOT_LABEL" | sed 's/[\/&]/\\&/g')
         sed -i "s|$ESCAPED_UUID|$ESCAPED_LABEL|" /etc/fstab
         echo "Updated /boot/efi line: replaced UUID=$BOOT_UUID with LABEL=$BOOT_LABEL"
     fi
@@ -47,17 +47,21 @@ grep '^UUID=' /etc/fstab | while read -r line; do
     LABEL=$(lsblk -no LABEL "$DEV" | head -n1)
 
     if [ -n "$LABEL" ]; then
-        ESCAPED_UUID=$(printf '%s\n' "UUID=$UUID" | sed 's/[&/\]/\\&/g')
-        ESCAPED_LABEL=$(printf '%s\n' "LABEL=$LABEL" | sed 's/[&/\]/\\&/g')
+        ESCAPED_UUID=$(printf 'UUID=%s' "$UUID" | sed 's/[\/&]/\\&/g')
+        ESCAPED_LABEL=$(printf 'LABEL=%s' "$LABEL" | sed 's/[\/&]/\\&/g')
         sed -i "s|$ESCAPED_UUID|$ESCAPED_LABEL|" /etc/fstab
         echo "Replaced UUID=$UUID with LABEL=$LABEL for $MOUNT"
     fi
 
-    # Check for LVM
+    # Check for LVM and replace with device path
     if [[ "$DEV" =~ /dev/mapper/ ]]; then
-        CURRENT_ID=$(grep "$MOUNT" /etc/fstab | awk '{print $1}')
-        ESCAPED_ID=$(printf '%s\n' "$CURRENT_ID" | sed 's/[&/\]/\\&/g')
-        sed -i "s|$ESCAPED_ID|$DEV|" /etc/fstab
-        echo "Replaced $CURRENT_ID with $DEV for $MOUNT (LVM)"
+        CURRENT_ID=$(grep -E "[[:space:]]+$MOUNT([[:space:]]+|$)" /etc/fstab | awk '{print $1}')
+        ESCAPED_ID=$(printf '%s' "$CURRENT_ID" | sed 's/[\/&]/\\&/g')
+        ESCAPED_DEV=$(printf '%s' "$DEV" | sed 's/[\/&]/\\&/g')
+
+        if [[ "$CURRENT_ID" != "$DEV" && -n "$CURRENT_ID" ]]; then
+            sed -i "s|$ESCAPED_ID|$ESCAPED_DEV|" /etc/fstab
+            echo "Replaced $CURRENT_ID with $DEV for $MOUNT (LVM)"
+        fi
     fi
 done
