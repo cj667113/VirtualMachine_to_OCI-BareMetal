@@ -17,7 +17,7 @@ KERNEL_VERSION=$(uname -r)
 rm -f /boot/loader/entries/*-${KERNEL_VERSION}.conf
 kernel-install add $(uname -r) /boot/vmlinuz-$(uname -r)
 grub2-mkconfig -o /etc/grub2-efi.cfg
-sudo stty -F /dev/ttyS0 speed 9600
+sudo stty -F /dev/ttyS0 speed 115200
 dmesg | grep console
 sudo systemctl enable getty@ttyS0
 sudo systemctl start getty@ttyS0
