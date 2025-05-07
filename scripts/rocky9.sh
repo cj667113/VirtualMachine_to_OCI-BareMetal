@@ -1,5 +1,5 @@
 #!/bin/bash
-yum install iscsi-initiator-utils iscsi-initiator-utils-iscsiuio libiscsi udisks2-iscsi -y
+yum install iscsi-initiator-utils iscsi-initiator-utils-iscsiuio libiscsi udisks2-iscsi grub2-efi-x64 grub2-efi-x64-modules shim-x64 -y
 
 sudo ln -sf /lib/systemd/system/multi-user.target /etc/systemd/system/default.target
 # grep rootlv may need to be adjusted if the root filesystem is on a different lv_name
